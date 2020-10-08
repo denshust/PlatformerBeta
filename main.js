@@ -28,7 +28,7 @@ var level = [
     "x     x    !                                                              x",
     "x     x    !                                       +                      x",
     "x--x  x    !                                                              x",
-    "x  x xx    !                                  +                           x",
+    "x  x xx    !                                     +                        x",
     "x  x     x,,~~!!!~~~~,   x  x  xxxxxxxxx~~~~~~~~~                         x",
     "x  x      x   xxx        x x  x                                           x",
     "x  x~~~~  x              x x  x                                           x",
