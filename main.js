@@ -8,27 +8,50 @@
 var canvas = document.getElementById('canvas');
 var context = canvas.getContext('2d');
 
+
+
+
 //var CANVAS_WIDTH = 1400;
 //var CANVAS_HEIGHT = 780;
-var white = '#ffffff'; //air
-var red = '#ff0000'; //lava              !
-var black = '#000000'; //wall            x
-var yellow = '#ffbb00'; //coins          *
-var green = '#006934';  //jumpPlatform   =
-var blue = '#0000ff'; // player          @
-var magenta = '#c702ae'; //platform      -
-var iceblue = '#00ffff'; //ice           ~
-var lightgreen = '#64ff4f'; //heal       +
-var brown = '#9c5500'; //mud             ,
+// var airimg = '#ffffff'; //air
+// var lavaimg = '#ff0000'; //lava              !
+// var wallimg = '#000000'; //wall            x
+// var coinimg = '#ffbb00'; //coins          *
+// var jumpimg = '#006934';  //jumpPlatform   =
+// var blue = '#0000ff'; // player          @
+// var platformimg = '#c702ae'; //platform      -
+// var iceimg = '#00ffff'; //ice           ~
+// var healimg = '#64ff4f'; //heal       +
+// var mudimg = '#9c5500'; //mud             ,
 var scale = 0.5;
 var size = 32*scale;
+var playerimg = new Image(size, size);
+playerimg.src = 'player64.png';
+var airimg = new Image(size, size);
+airimg.src = 'air64.png';
+var coinimg = new Image(size, size);
+coinimg.src = 'coin64.png';
+var platformimg = new Image(size, size);
+platformimg.src = 'platform64.png';
+var jumpimg = new Image(size, size);
+jumpimg.src = 'jump64.png';
+var lavaimg = new Image(size, size);
+lavaimg.src = 'lava64.png';
+var healimg = new Image(size, size);
+healimg.src = 'heal64.png';
+var mudimg = new Image(size, size);
+mudimg.src = 'mud64.png';
+var iceimg = new Image(size, size);
+iceimg.src = 'ice64.png';
+var wallimg = new Image(size, size);
+wallimg.src = 'wall64.png';
 var level = [
     "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
     "x     x+   !                                                              x",
     "x     x    !                                                              x",
     "x     x    !                                       +                      x",
     "x--x  x    !                                                              x",
-    "x  x xx    !                                  +      +                    x",
+    "x  x xx    !                                  +                           x",
     "x  x     x,,~~!!!~~~~,   x  x  xxxxxxxxx~~~~~~~~~                         x",
     "x  x      x   xxx        x x  x                                           x",
     "x  x~~~~  x              x x  x                                           x",
@@ -51,9 +74,9 @@ var level = [
     "x       x x  x             x$ x                                           x",
     "x       x x  x             x $x                                           x",
     "x xxxxxxx x--x             x+ x                                           x",
-    "x       x x  x             x  x  $                                        x",
-    "x   $   x x  x        x    x  x                                           x",
-    "xxxxxxx x x  xxxxxxxx xxxxxx  xxxxxxxxxxxxxx                              x",
+    "x       x x  x      x+x    x  x  $                                        x",
+    "x   $   x x  x      x x    x  x                                           x",
+    "xxxxxxx x x  xxxxxxxx xxxxxx  xxxxxxxxxxxxx                              x",
     "x       x x  x                             x          $                   x",
     "x@      x                                  x!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!x",
     "xxxxxxxxxxx==xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  
@@ -114,13 +137,14 @@ var FPS = 60;
 var then, now, past, fpsInterval;
 
 
-function Object (x,y,width,height,color)
+function Object (x,y,width,height,pic)
 {
     this.width=width;
     this.height=height;
     this.x=x;
     this.y=y;
-    this.color=color;
+   // this.color=color;
+    this.pic=pic;
 }
 
 var objects =[];
@@ -131,14 +155,14 @@ var gravitation = 0.8*scale
 // гравець
 var player = {
     width : size,
-    height : size,
+    height : size-1,
     xPrev:0,
     yPrev:0,
     x : 0,
     y : 0,
     xVelocity : 0,
     yVelocity : 0,
-    color : blue,
+    pic : playerimg,
     points:0,
     health:200,
     inAir:true,
@@ -177,41 +201,44 @@ var controller= {
 var drawTile = function(tile)
 {
     context.fillStyle = tile.color;
-    context.fillRect(tile.x,tile.y,tile.width,tile.height);
+   // context.fillRect(tile.x,tile.y,tile.width,tile.height);
+    var imag = tile.pic;
+    context.drawImage(tile.pic,tile.x,tile.y,size,size);
 }
 
-var readTile = function(tile)
+
+var readTileImage = function(tile)
 {
     switch(tile){
         case "@":
-            return blue
+            return playerimg
             break;
         case "x":
-            return black
+            return wallimg
             break;
         case "!":
-            return red
+            return lavaimg
             break;
         case "$":
-            return yellow
+            return coinimg
             break;
         case "-":
-            return magenta
+            return platformimg
             break;
         case "~":
-            return iceblue
+            return iceimg
             break;
         case "+":
-            return lightgreen
+            return healimg
             break;
         case "=":
-            return green
+            return jumpimg
             break;
         case ",":
-            return brown
+            return mudimg
             break;
         default:
-            return white
+            return airimg
             break;
     }
 }
@@ -255,20 +282,20 @@ var isCollided = function(obst, obj)
         }
 }
 
-var collideHandler = function(obst,obj,color)
+var collideHandler = function(obst,obj,pic)
 {
     if (isCollided(obst,obj))
     {
-        if(color==black||color==iceblue||color==green||color==brown)
+        if(pic==wallimg||pic==iceimg||pic==jumpimg||pic==mudimg)
         {
             if(obj.yPrev + obj.height <= obst.y)
             {
                 obj.y = obst.y - obj.height;
                 obj.yVelocity = 0;
                 obj.inAir = false;
-                if(color==green)
+                if(pic==jumpimg)
                 obj.yVelocity=-6*scale;
-                if(color==brown)
+                if(pic==mudimg)
                 obj.yVelocity=+7*scale;
                // console.debug("down : "+obj.x);
             }
@@ -289,13 +316,13 @@ var collideHandler = function(obst,obj,color)
                 obj.y = obst.y + obst.height;
                 obj.yVelocity =0;
             }
-            if(color==iceblue)
+            if(pic==iceimg)
             obj.xVelocity*=1.2;
-            if(color==brown)
+            if(pic==mudimg)
             obj.xVelocity*=0.3;
             
         }
-        if(color==red)
+        if(pic==lavaimg)
         {
             player.health-=1;
             if (player.health<=0)
@@ -305,7 +332,7 @@ var collideHandler = function(obst,obj,color)
             }
             player.inLava=true;
         }
-        if(color==magenta)
+        if(pic==platformimg)
         {
             if (controller.down)
             {
@@ -326,12 +353,12 @@ var collideHandler = function(obst,obj,color)
             }
             
         }
-        if(color==lightgreen)
+        if(pic==healimg)
         {
             player.health+=100;
             return true;
         }
-        if(color==yellow)
+        if(pic==coinimg)
         {
             console.debug("COIN!!!!!!!!!!!!!!!!!!");
             player.points++;
@@ -409,9 +436,9 @@ var draw = function()
 
     for (let i = 0; i < objects.length; i++) {
        // collideHandler(objects[i],player,objects[i].color);
-        if (collideHandler(objects[i],player,objects[i].color) == true)
+        if (collideHandler(objects[i],player,objects[i].pic) == true)
         {
-        objects[i].color = white;
+        objects[i].pic = airimg;
         }
     }
     
@@ -430,14 +457,14 @@ var setObjects=function()
         for (let j = 0; j < convertedLevel[0].length; j++) 
         {
             //drawTile(size*j,size*i,size,size,readTile(convertedLevel[i][j])) ;
-            let object = new Object(size*j,size*i,size,size,readTile(convertedLevel[i][j]));
+            let object = new Object(size*j,size*i,size,size,readTileImage(convertedLevel[i][j]));
             objects.push(object);
-            if(object.color==blue)
+            if(object.pic==playerimg)
             {  
                 player.x = object.x;
                 player.y = object.y;
-                console.debug(object.color);
-                object.color=white;
+                console.debug(object.pic);
+                object.pic=airimg;
           
             }
             
@@ -450,7 +477,7 @@ var setObjects=function()
 
 setObjects();
 startAnimation(FPS);
-//  drawOnce();
+
 
 window.addEventListener("keydown",controller.KeyListener);
 window.addEventListener("keyup",controller.KeyListener);
