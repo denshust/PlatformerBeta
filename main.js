@@ -139,7 +139,7 @@ var level = [
 
 canvas.width = convertedLevel[0].length*size;
 canvas.height = convertedLevel.length*size;
-var FPS = 30;
+var FPS = 60;
 var then, now, past, fpsInterval;
 
 
