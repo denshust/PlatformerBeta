@@ -139,7 +139,7 @@ var level = [
 
 canvas.width = convertedLevel[0].length*size;
 canvas.height = convertedLevel.length*size;
-var FPS = 60;
+var FPS = 30;
 var then, now, past, fpsInterval;
 
 
@@ -469,7 +469,7 @@ var draw = function()
             else
             {
                 end=true; 
-                player.health=9982819838; 
+              
                 player.pic=playerwin;
             }
         }
