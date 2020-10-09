@@ -27,6 +27,10 @@ var scale = 0.5;
 var size = 32*scale;
 var playerimg = new Image(size, size);
 playerimg.src = 'player64.png';
+var playerwin = new Image(size, size);
+playerwin.src = 'playerwin.png';
+var deadplayer = new Image(size, size);
+deadplayer.src = 'deadplayer64.png';
 var airimg = new Image(size, size);
 airimg.src = 'air64.png';
 var coinimg = new Image(size, size);
@@ -38,27 +42,29 @@ jumpimg.src = 'jump64.png';
 var lavaimg = new Image(size, size);
 lavaimg.src = 'lava64.png';
 var healimg = new Image(size, size);
-healimg.src = 'heal64.png';
+healimg.src = 'heal64g.png';
 var mudimg = new Image(size, size);
 mudimg.src = 'mud64.png';
 var iceimg = new Image(size, size);
 iceimg.src = 'ice64.png';
 var wallimg = new Image(size, size);
 wallimg.src = 'wall64.png';
+var duckimg = new Image(size, size);
+duckimg.src = 'duck64.png';
 var level = [
     "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-    "x     x+   !                                                              x",
-    "x     x    !                                                              x",
-    "x     x    !                                       +                      x",
-    "x--x  x    !                                                              x",
-    "x  x xx    !                                  +                           x",
-    "x  x     x,,~~!!!~~~~,   x  x  xxxxxxxxx~~~~~~~~~                         x",
-    "x  x      x   xxx        x x  x                                           x",
+    "x     x+   x                                                              x",
+    "x     x    x                                                              x",
+    "x     x                                            +                      x",
+    "x--x  x                                                                   x",
+    "x  x xx    !                                                              x",
+    "x  x     ~,,~~!!!        x  x  xxxxxxxxx~~~~~~~~~                         x",
+    "x  x      x   xxx~~~,,   x x  x                                           x",
     "x  x~~~~  x              x x  x                                           x",
-    "x            ,,,,,,,,,,,,x x  x                                           x",
-    "x               $ + $ + $  x  x                                           x",
-    "x                          x  x                                           x",
-    "x=           ~~~~~~~~~~~~~~x  x                                           x",
+    "x            ,,,,,,,,,,,,x x  xxx               $                         x",
+    "x    $          $ + $ + $  x  $+x                                         x",
+    "x         $                x  xxx                                         x",
+    "x==           ~~~~~~~~~~~~~x  x                                           x",
     "x                          x  x                                           x",
     "x                          x  x                                           x",
     "x ~~  ,,  ,,,              x  x                                           x",
@@ -73,13 +79,13 @@ var level = [
     "x-------x-x--x             x $x                                           x",
     "x       x x  x             x$ x                                           x",
     "x       x x  x             x $x                                           x",
-    "x xxxxxxx x--x             x+ x                                           x",
-    "x       x x  x      x+x    x  x  $                                        x",
+    "x xxxxxxx x--x             x$ x                                           x",
+    "x       x x  x       $x    x  x  $                                        x",
     "x   $   x x  x      x x    x  x                                           x",
-    "xxxxxxx x x  xxxxxxxx xxxxxx  xxxxxxxxxxxxx                              x",
-    "x       x x  x                             x          $                   x",
-    "x@      x                                  x!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!x",
-    "xxxxxxxxxxx==xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  
+    "xxxxxxx x x  xxxxxxxx xxxxxx  xxxxxxxxxxxxxx                              x",
+    "x       x x  x                             x          $              xxxxxx",
+    "x@      x                                 +x!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!x",
+    "xxxxxxxxxxx==xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x"  
     
     ];
   var level1 = [
@@ -164,7 +170,7 @@ var player = {
     yVelocity : 0,
     pic : playerimg,
     points:0,
-    health:200,
+    health:100,
     inAir:true,
     inLava:false,
     isDead:false
@@ -204,6 +210,13 @@ var drawTile = function(tile)
    // context.fillRect(tile.x,tile.y,tile.width,tile.height);
     var imag = tile.pic;
     context.drawImage(tile.pic,tile.x,tile.y,size,size);
+    if(end==true)
+    {
+        if(tile.pic == airimg)
+        {
+            tile.pic=duckimg;
+        }
+    }
 }
 
 
@@ -261,6 +274,7 @@ var animation = function(newTime) // кадри щосекунди
     {
         then = now - (past%fpsInterval);
         draw();
+        timer();
     }
 }
 
@@ -328,6 +342,7 @@ var collideHandler = function(obst,obj,pic)
             if (player.health<=0)
             {
                 player.health=0;
+                player.pic = deadplayer;
                 player.isDead=true;
             }
             player.inLava=true;
@@ -367,10 +382,10 @@ var collideHandler = function(obst,obj,pic)
         
     }
 }
-
+var end=false;
 var showCounter = function()
 {
-   
+  
     context.fillStyle = '#000000';
     context.font = 'normal 30px lucida console';
     
@@ -379,75 +394,94 @@ var showCounter = function()
     
     context.font = 'normal 10px lucida console';
     context.fillText(player.health,player.x-1,player.y-5);
+    
 }
 var time =0;
 var counter=0;
 var timer = function()
 {
-    counter++
-    if(counter==54)
+    if(!end)
     {
-        time++;
-        counter=0;
-    }
+        counter++
+        if(counter==60)
+        {
+            time++;
+            counter=0;
+        }
+    }   
 }
 var draw = function()
-{
-    timer();
-   if(!player.isDead)
-   {
-    player.xPrev = player.x;
-    player.yPrev = player.y;
-    if (controller.up&& player.inAir == false)
     {
-        player.yVelocity -= 15*scale;
-        player.inAir = true;
-    }
-    
-    if(controller.right)
-    {
-        player.xVelocity +=1*scale;
-    }
-    if (controller.left)
-    {
-        player.xVelocity -=1*scale;
-    }
-    
-    for (let index = 0; index < objects.length; index++) 
-    {
-        drawTile(objects[index]);
-    }
-   }
-  
-     player.yVelocity+=gravitation;
-
-    
-  if(player.inLava)
-  {
-  player.xVelocity*=0.6;
-  player.yVelocity+=0.4*scale;
-  player.inLava=false;
-  }
-    player.x += player.xVelocity;
-    player.y += player.yVelocity;
-    player.xVelocity *=0.8;
-   
-  
-
-    for (let i = 0; i < objects.length; i++) {
-       // collideHandler(objects[i],player,objects[i].color);
-        if (collideHandler(objects[i],player,objects[i].pic) == true)
+        
+        if(!player.isDead)
         {
-        objects[i].pic = airimg;
+            
+            player.xPrev = player.x;
+            player.yPrev = player.y;
+            if (controller.up&& player.inAir == false)
+            {
+                player.yVelocity -= 15*scale;
+                player.inAir = true;
+            }
+            
+            if(controller.right)
+            {
+                player.xVelocity +=1*scale;
+            }
+            if (controller.left)
+            {
+                player.xVelocity -=1*scale;
+            }
+            
+            for (let index = 0; index < objects.length; index++) 
+            {
+                drawTile(objects[index]);
+            }
+        
+        
+            player.yVelocity+=gravitation;
+
+            
+            if(player.inLava)
+            {
+            player.xVelocity*=0.6;
+            player.yVelocity+=0.4*scale;
+            player.inLava=false;
+            }
+            player.x += player.xVelocity;
+            player.y += player.yVelocity;
+            player.xVelocity *=0.8;
+        
+        
+
+            for (let i = 0; i < objects.length; i++) {
+            // collideHandler(objects[i],player,objects[i].color);
+                if (collideHandler(objects[i],player,objects[i].pic) == true)
+                {
+                objects[i].pic = airimg;
+                }
+            }
+            drawTile(player);
+            showCounter();
+            if(player.points!=20)
+            {
+            }
+            else
+            {
+                end=true; 
+                player.health=9982819838; 
+                player.pic=playerwin;
+            }
+        }
+        else
+        {
+            
+        }
+        if(player.y>canvas.height+size)
+        {
+            window.location.href = 'https://s14.stc.all.kpcdn.net/share/i/12/10647586/wr-960.jpg';
         }
     }
-    
-    if(!player.isDead)
-    {
-    drawTile(player);
-    }
-    showCounter();
-}
 
 
 var setObjects=function()
