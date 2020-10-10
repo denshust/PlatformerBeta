@@ -41,7 +41,7 @@ healimg.src = 'healg.png';
 mudimg.src = 'mud.png';
 iceimg.src = 'ice.png';
 wallimg.src = 'wall.png';
-duckimg.src = 'duck.png';
+duckimg.src = 'duck64.png';
 var level = [
     "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
     "x     x+   x                                                              x",
